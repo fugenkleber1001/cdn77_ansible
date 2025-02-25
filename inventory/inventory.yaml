@@ -1,0 +1,13 @@
+control_node:
+  hosts:
+    local:
+      ansible_host: 127.0.0.1
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+nginx:
+  hosts:
+    nginx-filehost:
+    nginx-proxy:
+  vars:
+    ansible_connection: community.docker.docker_api
+    ansible_python_interpreter: /usr/local/bin/python3

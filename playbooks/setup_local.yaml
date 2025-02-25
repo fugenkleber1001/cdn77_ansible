@@ -1,0 +1,44 @@
+- name: Set up the local environment for full control of Docker using Ansible
+  hosts: control_node
+  connection: local
+  tasks:
+    - name: Ensure Docker daemon is installed.
+      become: true
+      ansible.builtin.package:
+        name: "docker"
+        state: present
+    - name: Ensure docker daemon is running.
+      become: true
+      service:
+        name: docker
+        state: started
+    - name: Ensure SSH keys are generated in the target directory ./keys/
+      become: true
+      community.crypto.openssh_keypair:
+        mode: '600'
+        path: "/tmp/ssh_key"
+        regenerate: partial_idempotence
+        state: present
+        type: "ed25519"
+    - name: Register username running the Playbook as a variable
+      set_fact:
+        player_username: "{{ ansible_user_id }}"
+    - debug: var=player_username
+    - name: Set owner of /var/run/docker.sock to current user (hacky chown instead of docker group)
+      become: true
+      ansible.builtin.file:
+        owner: "{{ player_username }}"
+        path: "/var/run/docker.sock"
+#    - name: Create/check docker group for granting privileges to non-root users
+#      become: true
+#      ansible.builtin.group:
+#        name: docker
+#        state: present        
+#    - name: Add current user to (docker) group to minimize future privilege escalation
+#      become: true
+#      ansible.builtin.user:
+#        name: "{{ player_username }}"
+#        groups: docker
+#        append: true
+#    - name: Refresh group membership by resetting SSH connection
+#      meta: reset_connection

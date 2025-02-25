@@ -1,0 +1,66 @@
+- name: Set up the infrastructure on Docker daemon as debian containers
+  hosts: control_node
+  connection: local
+  become: true
+  tasks:
+    - name: Ensure docker_net network exists within Docker
+      community.docker.docker_network:
+        name: docker_net
+    - name: Ensure python-requests is installed for image fetching
+      ansible.builtin.package:
+        name: "python-requests"
+        state: present
+    - name: Set up filehost container for nginx
+      become: true
+      community.docker.docker_container:
+        name: nginx-filehost
+        cap_drop: ALL
+        detach: true
+        hostname: nginx-filehost
+#        image: "debian:12.9" #pin version
+        image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
+#        published_ports:
+#         - "30001:22"
+        pull: missing
+        restart_policy: "unless-stopped"
+        state: started
+        privileged: true
+        interactive: true
+        networks:
+        - name: docker_net
+#    - name: Set up python3 within the nginx-filehost container (not idempotent)
+#      community.docker.docker_container_exec:
+#        command: /bin/sh -c "apt-get update && apt-get install -y python3"
+#        container: nginx-filehost
+    - name: Set up proxy container for nginx
+      community.docker.docker_container:
+        name: nginx-proxy
+        cap_drop: ALL
+        detach: true
+        hostname: nginx-proxy
+#        image: "debian:12.9" #pin version
+        image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
+        published_ports:
+#         - "30002:22"
+         - "80:80"
+#         - "443:443"
+        pull: missing
+        restart_policy: "unless-stopped"
+        state: started
+        privileged: true
+        interactive: true
+        networks:
+        - name: docker_net
+#    - name: Set up python3 within the nginx-proxy container (not idempotent)
+#      community.docker.docker_container_exec:
+#        command: /bin/sh -c "apt-get update && apt-get install -y python3"
+#        container: nginx-proxy
+
+#- name: Test docker socket
+#  gather_facts: false
+#  hosts: nginx
+#  tasks:
+#    - name: Test file
+#      ansible.builtin.file:
+#        path: /etc/hosts
+#        state: file
