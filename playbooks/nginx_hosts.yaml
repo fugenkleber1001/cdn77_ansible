@@ -10,3 +10,15 @@
       ansible.builtin.service:
         name: nginx
         state: started
+
+- name: Set up nginx proxy
+  gather_facts: false
+  hosts: nginx-proxy
+  tasks:
+   - name: Make sure nginx is using the pre-made config
+     ansible.builtin.copy:
+       src: configs/nginx/proxy/default
+       dest: /etc/nginx/sites-available/default
+   - name: Reload nginx config 
+     ansible.builtin.command:
+       cmd: nginx -s reload
