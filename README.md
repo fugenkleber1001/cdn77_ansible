@@ -71,5 +71,10 @@ Abych si dále ušetřil práci s nastavování SSH daemonů na jednotlivých ko
 Další akce prováděné na kontejnerech pak bylo možné provádět stejně, jako s SSH připojením.
 Instalaci balíčku a spuštění služby jsem si vyzkoušel již během sestavování prvního playbooku, tedy zde nebyl žádný problém.
 
-Posledním krokem bylo nakopírování konfiguračního souboru pro nginx do proxy node pomocí [ansible.builtin.copy](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html) a reload konfigurace pomocí [ansible.builtin.command](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html).
+Posledním krokem bylo nakopírování konfiguračního souboru pro nginx do proxy node pomocí [ansible.builtin.copy](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html) a reload konfigurace pomocí [ansible.builtin.command](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html). Tento postup jsem zvolil místo `state: restarted`, protože nezpůsobuje výpadek připojení potenciálních klientů (ačkoliv v tomto případě žádní nejsou).
 Kontejner **nginx-proxy** jsem zpřístupnil přes bridge network na [localhost:80](http://localhost).
+
+
+
+---
+

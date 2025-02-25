@@ -1,0 +1,12 @@
+- name: Test all services are up and running
+  hosts: control_node
+  tasks:
+   - name: Test port 80
+     ansible.builtin.wait_for:
+       host: localhost
+       port: 80
+   - action: uri url=http://localhost return_content=yes
+     register: web_test_result
+   - fail:
+       msg: 'nginx upstream not available'
+     when: "'Welcome to nginx' not in web_test_result.content"
