@@ -34,7 +34,7 @@ Jako řešení jsem tedy zvolil pomocí Ansible na localhostu zprovoznit i samot
 Po detailnějším pročtení dokumentace Ansible jsem se jal připravit první playbook, který by měl obsluhovat instalaci prerekvizit na hostitelském zařízení, tedy zároveň na control node.
 Sestavení prvního playbooku a inventáře nebylo nikterak složité, po připravení prostředí (~~nainstalování sshd, vytvoření klíčů a~~ nastavení keyless rootu) jsem vytvořil první Play, zatím jen s jedním krokem - a sice nainstalování Docker daemonu.
 
-Jako modul po instalaci, vzhledem k tomu, že vypracování provádím na distribuci Arch Linux, nikoliv Debian, jsem zvolil `ansible.builtin.package`, která je podle dokumentace univerzální napříč distribucemi.
+Jako modul pro instalaci, vzhledem k tomu, že vypracování provádím na distribuci Arch Linux, nikoliv Debian, jsem zvolil `ansible.builtin.package`, který je podle dokumentace univerzální napříč distribucemi.
 
 Spuštění playbooku v kořenovém adresáři provádím následujícím příkazem:
 `ansible-playbook playbooks/setup_local.yaml -i ./inventory/inventory.yaml`
@@ -51,7 +51,7 @@ Zde jsem použil první proměnnou, a sice `{{ ansible_user_id }}` odpovídajíc
 Taktéž jsem se setkal s modulem `ansible.builtin.debug`, který jsem použil pro oveření, zda při `become: true` proměnná vrací správnou hodnotu.
 
 Tento krok rozhodně nebyl nutný a trochu mě při práci zbrzdil, protože jsem mimo jiné narazil na to, že s `connection: local` nelze efektivně použít skupnu nově přiřazenou uživateli, protože vše probíhá v aktuální session.
-Monžosti tedy byly dvě:
+Monžosti tedy byly tři:
 1. zahodit `connection: local` a pracovat dále s SSH připojením na localhost
 2. ke všem zbylým lokálním docker-related taskům připisovat `become: true`
 3. ačkoliv nejde o best practice, změnit vlastníka `/var/run/docker.sock` na aktuálního uživatele
@@ -77,5 +77,5 @@ Kontejner **nginx-proxy** jsem zpřístupnil přes bridge network na [localhost:
 
 ---
 
-## ADD_DATE - Apache Kafka
+## ADD_DATE - Prometheus
 
