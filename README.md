@@ -12,6 +12,7 @@ Pro jednoduchost opomíjí Execution Environment a spoléhá se na instalaci ost
 Použité zdroje:
  - (https://docs.ansible.com)
  - Místy (https://stackoverflow.com)
+
 Použitý software:
  - ansible
  - docker
