@@ -8,7 +8,7 @@
         name: docker_net
     - name: Ensure python-requests is installed for image fetching
       ansible.builtin.package:
-        name: "python-requests"
+        name: "python3-requests"
         state: present
     - name: Set up filehost container for nginx
       become: true
@@ -18,7 +18,7 @@
         detach: true
         hostname: nginx-filehost
         image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
-        pull: missing
+        pull: true
         restart_policy: "unless-stopped"
         state: started
         privileged: true
@@ -34,7 +34,7 @@
         image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
         published_ports:
          - "80:80"
-        pull: missing
+        pull: true
         restart_policy: "unless-stopped"
         state: started
         privileged: true
@@ -50,7 +50,7 @@
         image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
         published_ports:
          - "9090:9090"
-        pull: missing
+        pull: true
         restart_policy: "unless-stopped"
         state: started
         privileged: true

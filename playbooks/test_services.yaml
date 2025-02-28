@@ -1,5 +1,6 @@
 - name: Test all services are up and running
   hosts: control_node
+  connection: local
   tasks:
    - name: Test port 80
      ansible.builtin.wait_for:

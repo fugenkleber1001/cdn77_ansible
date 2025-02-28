@@ -5,7 +5,7 @@
     - name: Ensure Docker daemon is installed.
       become: true
       ansible.builtin.package:
-        name: "docker"
+        name: "docker.io"
         state: present
     - name: Ensure docker daemon is running.
       become: true
