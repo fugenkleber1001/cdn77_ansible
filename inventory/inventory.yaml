@@ -11,3 +11,9 @@ nginx:
   vars:
     ansible_connection: community.docker.docker_api
     ansible_python_interpreter: /usr/local/bin/python3
+prometheus:
+  hosts:
+    prometheus-host:
+  vars:
+    ansible_connection: community.docker.docker_api
+    ansible_python_interpreter: /usr/local/bin/python3

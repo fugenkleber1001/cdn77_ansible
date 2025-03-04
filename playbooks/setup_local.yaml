@@ -12,14 +12,14 @@
       service:
         name: docker
         state: started
-    - name: Ensure SSH keys are generated in the target directory ./keys/
-      become: true
-      community.crypto.openssh_keypair:
-        mode: '600'
-        path: "/tmp/ssh_key"
-        regenerate: partial_idempotence
-        state: present
-        type: "ed25519"
+#    - name: Ensure SSH keys are generated in the target directory ./keys/
+#      become: true
+#      community.crypto.openssh_keypair:
+#        mode: '600'
+#        path: "/tmp/ssh_key"
+#        regenerate: partial_idempotence
+#        state: present
+#        type: "ed25519"
     - name: Register username running the Playbook as a variable
       set_fact:
         player_username: "{{ ansible_user_id }}"

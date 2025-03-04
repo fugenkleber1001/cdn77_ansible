@@ -1,0 +1,21 @@
+- name: Set up Prometheus host
+  hosts: prometheus
+  gather_facts: false
+  tasks:
+    - name: Ensure Prometheus is installed
+      ansible.builtin.package:
+        name: prometheus
+        state: present
+    - name: Ensure Prometheus service is running
+      ansible.builtin.service:
+        name: prometheus
+        state: started
+        enabled: true
+    - name: Use the pre-made config for Prometheus
+      ansible.builtin.copy:
+        src: files/configs/prometheus/prometheus.yml
+        dest: /etc/prometheus/prometheus.yml
+    - name: Reload the config for Propmetheus
+      ansible.builtin.service:
+        name: prometheus
+        state: reloaded

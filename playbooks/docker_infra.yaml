@@ -40,13 +40,14 @@
         privileged: true
         interactive: true
         networks:
-        - name: docker_net
+         - name: docker_net
+         - name: bridge
     - name: Set up proxy container for Prometheus
       community.docker.docker_container:
-        name: prometheus
+        name: prometheus-host
         cap_drop: ALL
         detach: true
-        hostname: prometheus
+        hostname: prometheus-host
         image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
         published_ports:
          - "9090:9090"
@@ -57,5 +58,5 @@
         interactive: true
         networks:
          - name: docker_net
-
+         - name: bridge
 

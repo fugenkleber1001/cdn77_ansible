@@ -6,10 +6,11 @@
       ansible.builtin.package:
         name: nginx
         state: present
-    - name: Ensure nginx service is running  
+    - name: Ensure nginx service is running
       ansible.builtin.service:
         name: nginx
         state: started
+        enabled: true
 
 - name: Set up nginx proxy
   gather_facts: false
@@ -19,6 +20,6 @@
      ansible.builtin.copy:
        src: configs/nginx/proxy/default
        dest: /etc/nginx/sites-available/default
-   - name: Reload nginx config 
+   - name: Reload nginx config
      ansible.builtin.command:
        cmd: nginx -s reload

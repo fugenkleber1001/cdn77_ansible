@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 4s
+  evaluation_interval: 4s
+scrape_configs:
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-filehost:80','nginx-proxy:80']

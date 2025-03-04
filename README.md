@@ -21,7 +21,7 @@ Použitý software:
 
 ---
 
-## 20240220 - První kroky:
+## 20250220 - První kroky:
 
 Pročetl jsem zadání a zprvu působilo vcelku srozumitelně, po bližším prozkoumání Ansible a pročtení části dokumentace jsem se rozhodl, že mi nepřijde smysluplné jej přeskakovat, ale naopak se s ním do hloubky seznámit.
 Vzhledem k tomu, že mám zkušenosti s Dockerem, rozhodl jsem se jej použít pro realizaci.
@@ -29,12 +29,13 @@ Původně jsem počítal s tím, že bych celou síť včetně control node prov
 Na konci zadání jsem ale narazil na požadavek automatizace vytvoření celé infrastruktury, což tento způsob řešení poněkud zkomplikoval, tedy alespoň za předpokladu, že testovací server bude, jak jsem pochopil, zároveň sloužit jako control node.
 Jako řešení jsem tedy zvolil pomocí Ansible na localhostu zprovoznit i samotný docker daemon, zpřistupnit jej pod UDS `/var/run/docker.sock`, a s pomocí `community.docker` pak spustit jednotlivé kontejnery.
 
-## 20240224 - Sestavení inventáře a prvního playbooku
+## 20250224 - Sestavení inventáře a prvního playbooku
 
 Po detailnějším pročtení dokumentace Ansible jsem se jal připravit první playbook, který by měl obsluhovat instalaci prerekvizit na hostitelském zařízení, tedy zároveň na control node.
 Sestavení prvního playbooku a inventáře nebylo nikterak složité, po připravení prostředí (~~nainstalování sshd, vytvoření klíčů a~~ nastavení keyless rootu) jsem vytvořil první Play, zatím jen s jedním krokem - a sice nainstalování Docker daemonu.
 
 Jako modul pro instalaci, vzhledem k tomu, že vypracování provádím na distribuci Arch Linux, nikoliv Debian, jsem zvolil `ansible.builtin.package`, který je podle dokumentace univerzální napříč distribucemi.
+Bohužel jsem tímto konpatibilitu napříč distribucemi nezajistil, což jsem zjistil o týden později, viz zápis 20250304.
 
 Spuštění playbooku v kořenovém adresáři provádím následujícím příkazem:
 `ansible-playbook playbooks/setup_local.yaml -i ./inventory/inventory.yaml`
@@ -60,7 +61,7 @@ Rozhodl jsem se pro třetí možnost, protože mi ušetří práci a při testov
 
 ---
 
-## 20240221 - Ansible + Docker
+## 20250221 - Ansible + Docker
 
 Po nainstalování všech dependencí jsem konečně mohl přistoupit ke spuštění docker kontejnerů (prozatím pouze nginx).
 Modul [community.docker.docker_container](https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html) byl poměrně přímočarý a spuštění kontejnerů proběhlo bez větších problémů.
@@ -77,5 +78,12 @@ Kontejner **nginx-proxy** jsem zpřístupnil přes bridge network na [localhost:
 
 ---
 
-## ADD_DATE - Prometheus
+## 20250304 - Prometheus
+
+Po dovolené a delší pauze jsem se vrátil k tasku a rozhodl se zprovoznit Prometheus. Během dovolené jsem měl k dispozici pouze MacBook, tedy jsem na něm zprovoznil virtuální prostředí a rozhodl se rovnou playbooky otestovat na Debianu.
+Zde jsem si uvědomil svou dřívější krátkozrakost, protože jsem při spuštění narazil na rozdílné názvy balíčků mezi distribucemi. Například `docker.io` v Debianu vs. `docker` v Arch apod..
+Tyto drobné rozdíly jsem tedy opravil, ale během dovolené jinak nezbylo moc času na další práci. Tuto jsem tedy obnovil v úterý a pokračoval ke zprovoznění systému Prometheus.
+Spuštění kontejneru a zprovoznění služby již klasicky vcelku bez problému, následně jsem vyhledal běžné umístění konfiguračního souboru, tento jsem odkázal na existující nginx kontejnery a přidal reload služby na konec playbooku.
+Dalším krokem bylo spuštění doposud neexistujících exportérů.
+
 
