@@ -10,3 +10,11 @@ server {
                 proxy_pass  http://nginx-filehost:80;
         }
 }
+server {
+	listen 8080;
+	listen [::]:8080;
+	server_name nginx-proxy;
+	location = /stub_status {
+    		stub_status;
+	}
+}

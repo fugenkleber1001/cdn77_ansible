@@ -11,15 +11,41 @@
         name: nginx
         state: started
         enabled: true
+    - name: Ensure nginx exporters are installed
+      ansible.builtin.package:
+        name: prometheus-nginx-exporter
+        State: present
 
 - name: Set up nginx proxy
   gather_facts: false
   hosts: nginx-proxy
   tasks:
-   - name: Make sure nginx is using the pre-made config
+   - name: Make sure nginx proxy is using the pre-made config
      ansible.builtin.copy:
        src: configs/nginx/proxy/default
        dest: /etc/nginx/sites-available/default
    - name: Reload nginx config
      ansible.builtin.command:
        cmd: nginx -s reload
+
+- name: Set up nginx filehost
+  gather_facts: false
+  hosts: nginx-filehost
+  tasks:
+   - name: Make sure nginx filehost is using the pre-made config
+     ansible.builtin.copy:
+       src: configs/nginx/filehost/default
+       dest: /etc/nginx/sites-available/default
+   - name: Reload nginx config
+     ansible.builtin.command:
+       cmd: nginx -s reload
+
+- name: Make sure nginx exporters are running
+  gather_facts: false
+  hosts: nginx
+  tasks:
+   - name: Start or check exporter service
+     ansible.builtin.service:
+       name: nginx-prometheus-exporter
+       state: started
+       enabled: true
