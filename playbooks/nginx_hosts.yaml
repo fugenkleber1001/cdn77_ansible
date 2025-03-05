@@ -14,7 +14,11 @@
     - name: Ensure nginx exporters are installed
       ansible.builtin.package:
         name: prometheus-nginx-exporter
-        State: present
+        state: present
+    - name: /var/log/prometheus must exist for exporters to work
+      ansible.builtin.file:
+        path: "/var/log/prometheus/"
+        state: directory
 
 - name: Set up nginx proxy
   gather_facts: false
@@ -36,6 +40,10 @@
      ansible.builtin.copy:
        src: configs/nginx/filehost/default
        dest: /etc/nginx/sites-available/default
+   - name: Serve bundled index.html
+     ansible.builtin.copy:
+       src: content/nginx/filehost/index.html
+       dest: /var/www/html/index.html
    - name: Reload nginx config
      ansible.builtin.command:
        cmd: nginx -s reload
@@ -46,6 +54,6 @@
   tasks:
    - name: Start or check exporter service
      ansible.builtin.service:
-       name: nginx-prometheus-exporter
+       name: prometheus-nginx-exporter
        state: started
        enabled: true

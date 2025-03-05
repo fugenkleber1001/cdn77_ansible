@@ -10,4 +10,4 @@
      register: web_test_result
    - fail:
        msg: 'nginx upstream not available'
-     when: "'Welcome to nginx' not in web_test_result.content"
+     when: "'Thou hast been most wondrously blessed by the mighty gods of nginx.' not in web_test_result.content"

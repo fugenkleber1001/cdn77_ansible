@@ -13,8 +13,8 @@ server {
 server {
 	listen 8080;
 	listen [::]:8080;
-	server_name nginx-proxy;
-	location = /stub_status {
-    		stub_status;
+	server_name _;
+	location /stub_status {
+		stub_status;
 	}
 }

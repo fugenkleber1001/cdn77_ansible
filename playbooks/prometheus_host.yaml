@@ -15,7 +15,7 @@
       ansible.builtin.copy:
         src: files/configs/prometheus/prometheus.yml
         dest: /etc/prometheus/prometheus.yml
-    - name: Reload the config for Propmetheus
+    - name: Reload the config for Prometheus
       ansible.builtin.service:
         name: prometheus
         state: reloaded
