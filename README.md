@@ -46,7 +46,7 @@ Doposud se všechno jevilo vcelku přímočaře, avšak zde jsem narazil na prvn
 Po několika minutách v dokumentaci jsem však přišel na to, že jsem kromě `become: true` nastavil i `become_user: root`, což zjevně způsobilo zmíněný password prompt.
 Po odstranění `become_user: root` instalace docker daemonu proběhla v pořádku.
 
-Po instalaci a spuštění docker daemonu jsem se pokoušel přidal uživatele spouštějícího playbook do skupiny `docker`, pro omezení dalších eskalací oprávnění - zbytek akcí se provádí přímo v Docker daemonu ~~, nebo pomocí SSH připojení~~ pomocí [community.docker.docker_api](https://ansible-collections.github.io/community.docker/branch/main/docker_api_connection.html#ansible-collections-community-docker-docker-api-connection).
+Po instalaci a spuštění docker daemonu jsem se pokoušel přidat uživatele spouštějícího playbook do skupiny `docker`, pro omezení dalších eskalací oprávnění - zbytek akcí se provádí přímo v Docker daemonu ~~, nebo pomocí SSH připojení~~ pomocí [community.docker.docker_api](https://ansible-collections.github.io/community.docker/branch/main/docker_api_connection.html#ansible-collections-community-docker-docker-api-connection).
 
 Zde jsem použil první proměnnou, a sice `{{ ansible_user_id }}` odpovídající uživateli spouštějícímu playbook.
 Taktéž jsem se setkal s modulem `ansible.builtin.debug`, který jsem použil pro oveření, zda při `become: true` proměnná vrací správnou hodnotu.
@@ -83,9 +83,19 @@ Jednou z možností byl i mount předvytvořených konfiguračních souborů př
 ## 20250304 - Prometheus
 
 Po dovolené a delší pauze jsem se vrátil k tasku a rozhodl se zprovoznit Prometheus. Během dovolené jsem měl k dispozici pouze MacBook, tedy jsem na něm zprovoznil virtuální prostředí a rozhodl se rovnou playbooky otestovat na Debianu.
+
 Zde jsem si uvědomil svou dřívější krátkozrakost, protože jsem při spuštění narazil na rozdílné názvy balíčků mezi distribucemi. Například `docker.io` v Debianu vs. `docker` v Arch apod..
 Tyto drobné rozdíly jsem tedy opravil, ale během dovolené jinak nezbylo moc času na další práci. Tuto jsem tedy obnovil v úterý a pokračoval ke zprovoznění systému Prometheus.
 Spuštění kontejneru a zprovoznění služby již klasicky vcelku bez problému, následně jsem vyhledal běžné umístění konfiguračního souboru, tento jsem odkázal na existující nginx kontejnery a přidal reload služby na konec playbooku.
-Dalším krokem bylo spuštění doposud neexistujících exportérů.
 
+Dalším krokem bylo spuštění doposud neexistujících nginx exportérů, které zahrnovalo vcelku jednoduchou změnu v nginx konfiguraci obou kontejnerů, nainstalování balíčku a spuštění služby. Zde mě zbrzdil pouze neexistující adresář, do kterého ve výchozím nastavení loguje nginx exportér. Místo změny umístění logů v definici systémové služby jsem se rozhodl adresář jednoduše vytvořit.
 
+---
+
+note to self:
+- variable expansion, redundance reduction, loop, with_item (deprecated?)
+- nginx limit 8080 to internal hostname
+- nginx proxy caching
+- kafka cluster
+- machine + human readable = json quite likely
+ 
