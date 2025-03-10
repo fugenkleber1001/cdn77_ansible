@@ -2,12 +2,25 @@
   hosts: control_node
   connection: local
   tasks:
-   - name: Test port 80
+   - name: Test port
      ansible.builtin.wait_for:
        host: localhost
-       port: 80
-   - action: uri url=http://localhost return_content=yes
+       port: "{{ item }}"
+       timeout: 1
+     loop: "{{ [8011, 9090, 9092, 9093, 9094] }}"
+   - name: Test if nginx serves intended content
+     ansible.builtin.uri:
+       url: "http://localhost:8011"
+       return_content: true
      register: web_test_result
    - fail:
        msg: 'nginx upstream not available'
      when: "'Thou hast been most wondrously blessed by the mighty gods of nginx.' not in web_test_result.content"
+   - name: Test if prometheus serves intended content
+     ansible.builtin.uri:
+       url: "http://localhost:9090"
+       return_content: true
+     register: prom_result
+   - fail:
+       msg: 'prometheus not available'
+     when: "'Prometheus' not in prom_result.content"

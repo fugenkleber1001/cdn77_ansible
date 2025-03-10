@@ -1,0 +1,65 @@
+- name: Generate random UUID and store it in ./plabooks/files/envtmp/kafka_cluster_uuid
+  hosts: control_node
+  connection: local
+  tasks:
+  - name: Make sure ./files/envtmp/ exists
+    ansible.builtin.file:
+      path: "{{ playbook_dir }}/files/envtmp/"
+      state: directory
+  - name: Check UUID file
+    ansible.builtin.stat:
+      path: "{{ playbook_dir }}/files/envtmp/kafka_cluster_uuid"
+    register: uuidfile
+  - name: Generate random UUID
+    ansible.builtin.copy:
+      dest: "{{ playbook_dir }}/files/envtmp/kafka_cluster_uuid"
+      content: "{{ lookup('password', '/dev/null chars=ascii_letters,digits') | to_uuid }}"
+    when: (not uuidfile.stat.exists) or newclusteruuid is defined
+
+- name: Set up complete Kafka cluster (KRaft broker,controller)
+  hosts: kafka
+  vars:
+    kafka_version: "3.9.0"
+    kafka_scala_version: "2.12"
+    kafka_location: "dlcdn.apache.org"
+  tasks:
+    - name: Make sure nestat (net-tools) is available
+      ansible.builtin.package:
+        name: net-tools
+        state: present
+    - name: Ensure java is installed
+      ansible.builtin.package:
+        name: openjdk-17-jdk
+        state: present
+    - name: Directory /opt/archived for downloads
+      ansible.builtin.file:
+         path: /opt/archived
+         state: directory
+    - name: Grab the Kafka release
+      ansible.builtin.get_url:
+        dest: "/opt/archived/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+        url: "https://{{ kafka_location}}/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    - name: Extract the Kafka release
+      ansible.builtin.unarchive:
+        src: "/opt/archived/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+        dest: "/opt/"
+        remote_src: true
+    - name: Symlink the version to prevent disasters
+      ansible.builtin.file:
+        src: "/opt/kafka_{{ kafka_scala_version}}-{{ kafka_version }}"
+        dest: "/opt/kafka_service"
+        state: link
+    - name: Fill-in j2 template for Kafka config
+      ansible.builtin.template:
+        src: configs/kafka/server.properties.j2
+        dest: /opt/kafka_service/config/kraft_custom.properties
+    - name: Copy over the systemd service definition
+      ansible.builtin.template:
+        src: services/kafka/kafka.sh.j2
+        dest: /etc/init.d/kafka
+        mode: "0755"
+    - name: Make sure Kafka service is running
+      ansible.builtin.service:
+        name: kafka
+        state: started
+        enabled: true

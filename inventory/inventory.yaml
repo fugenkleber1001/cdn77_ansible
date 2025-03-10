@@ -4,16 +4,21 @@ control_node:
       ansible_host: 127.0.0.1
   vars:
     ansible_python_interpreter: /usr/bin/python3
-nginx:
-  hosts:
-    nginx-filehost:
-    nginx-proxy:
+    docker_host: "unix://{{ lookup('env', 'XDG_RUNTIME_DIR') }}/docker.sock"
+
+docker_hosts:
+  children:
+    nginx:
+      hosts:
+       nginx-filehost:
+       nginx-proxy:
+    prometheus:
+      hosts:
+        prometheus-host:
+    kafka:
+      hosts:
+        kafka[1:5]:
   vars:
     ansible_connection: community.docker.docker_api
     ansible_python_interpreter: /usr/local/bin/python3
-prometheus:
-  hosts:
-    prometheus-host:
-  vars:
-    ansible_connection: community.docker.docker_api
-    ansible_python_interpreter: /usr/local/bin/python3
+    ansible_docker_docker_host: "unix://{{ lookup('env', 'XDG_RUNTIME_DIR') }}/docker.sock"

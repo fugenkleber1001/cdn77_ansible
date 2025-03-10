@@ -1,7 +1,7 @@
 server {
         listen 80 default_server;
         listen [::]:80 default_server;
-        server_name _;
+        server_name nginx-filehost;
         root /var/www/html;
         location / {
                 try_files $uri $uri/ =404;
@@ -10,7 +10,7 @@ server {
 server {
 	listen 8080;
 	listen [::]:8080;
-	server_name _;
+	server_name nginx-filehost;
 	location /stub_status {
 		stub_status;
 	}

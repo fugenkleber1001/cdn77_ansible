@@ -19,41 +19,26 @@
       ansible.builtin.file:
         path: "/var/log/prometheus/"
         state: directory
-
-- name: Set up nginx proxy
-  gather_facts: false
-  hosts: nginx-proxy
-  tasks:
-   - name: Make sure nginx proxy is using the pre-made config
-     ansible.builtin.copy:
-       src: configs/nginx/proxy/default
-       dest: /etc/nginx/sites-available/default
-   - name: Reload nginx config
-     ansible.builtin.command:
-       cmd: nginx -s reload
+    - name: Make sure nginx proxy is using the pre-made config
+      ansible.builtin.template:
+        src: "configs/nginx/{{ inventory_hostname }}/default.j2"
+        dest: /etc/nginx/sites-available/default
+      register: configcopy
+    - name: Reload nginx config
+      ansible.builtin.command:
+        cmd: nginx -s reload
+      when: configcopy.changed
+    - name: Start or check exporter service
+      ansible.builtin.service:
+        name: prometheus-nginx-exporter
+        state: started
+        enabled: true
 
 - name: Set up nginx filehost
   gather_facts: false
   hosts: nginx-filehost
   tasks:
-   - name: Make sure nginx filehost is using the pre-made config
-     ansible.builtin.copy:
-       src: configs/nginx/filehost/default
-       dest: /etc/nginx/sites-available/default
    - name: Serve bundled index.html
      ansible.builtin.copy:
-       src: content/nginx/filehost/index.html
+       src: "content/nginx/{{ inventory_hostname }}/index.html"
        dest: /var/www/html/index.html
-   - name: Reload nginx config
-     ansible.builtin.command:
-       cmd: nginx -s reload
-
-- name: Make sure nginx exporters are running
-  gather_facts: false
-  hosts: nginx
-  tasks:
-   - name: Start or check exporter service
-     ansible.builtin.service:
-       name: prometheus-nginx-exporter
-       state: started
-       enabled: true

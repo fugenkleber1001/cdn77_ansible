@@ -1,7 +1,22 @@
 - name: Set up the infrastructure on Docker daemon as debian containers
   hosts: control_node
   connection: local
-  become: true
+  module_defaults:
+    community.docker.docker_container:
+      privileged: true
+      state: started
+      detach: true
+      image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
+      pull: missing
+      restart_policy: "unless-stopped"
+      interactive: true
+      cap_drop: ALL
+      networks:
+       - name: docker_net
+       - name: bridge
+      docker_host: "{{ docker_host }}"
+    community.docker.docker_network:
+      docker_host: "{{ docker_host }}"
   tasks:
     - name: Ensure docker_net network exists within Docker
       community.docker.docker_network:
@@ -11,52 +26,40 @@
         name: "python3-requests"
         state: present
     - name: Set up filehost container for nginx
-      become: true
       community.docker.docker_container:
         name: nginx-filehost
-        cap_drop: ALL
-        detach: true
         hostname: nginx-filehost
-        image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
-        pull: true
-        restart_policy: "unless-stopped"
-        state: started
-        privileged: true
-        interactive: true
         networks:
-        - name: docker_net
+         - name: docker_net
     - name: Set up proxy container for nginx
       community.docker.docker_container:
         name: nginx-proxy
-        cap_drop: ALL
-        detach: true
         hostname: nginx-proxy
-        image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
         published_ports:
-         - "80:80"
-        pull: true
-        restart_policy: "unless-stopped"
-        state: started
-        privileged: true
-        interactive: true
-        networks:
-         - name: docker_net
-         - name: bridge
+         - "8011:8011"
     - name: Set up proxy container for Prometheus
       community.docker.docker_container:
         name: prometheus-host
-        cap_drop: ALL
-        detach: true
         hostname: prometheus-host
-        image: "python:3.14.0a5-slim-bookworm" #python-preinstalled bookworm
         published_ports:
          - "9090:9090"
-        pull: true
-        restart_policy: "unless-stopped"
-        state: started
-        privileged: true
-        interactive: true
-        networks:
-         - name: docker_net
-         - name: bridge
-
+    - name: Set up Kafka containers
+      community.docker.docker_container:
+        name: "kafka{{ item }}"
+        hostname: "kafka{{ item }}"
+        published_ports:
+         - "{{ item + 9091 }}:9092"
+      loop: "{{ range(1, 6) }}"
+    - name: Bring up Kafka Prometheus overseer
+      community.docker.docker_container:
+        name: kafka-monitor
+        hostname: kafka-monitor
+        image: "danielqsj/kafka-exporter:latest"
+        published_ports:
+         - 9308:9308
+        command: >
+          --kafka.server=kafka1:9092
+          --kafka.server=kafka2:9092
+          --kafka.server=kafka3:9092
+          --kafka.server=kafka4:9092
+          --kafka.server=kafka5:9092

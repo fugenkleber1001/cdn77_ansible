@@ -1,0 +1,60 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          kafka
+# Required-Start:    $network $syslog
+# Required-Stop:     $network $syslog
+# Should-Start:      $local_fs
+# Should-Stop:       $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Description:       Apache Kafka service
+### END INIT INFO
+
+export KAFKA_HOME="/opt/kafka_service"
+export KAFKA_BIN="$KAFKA_HOME/bin"
+export KAFKA_CONFIG="$KAFKA_HOME/config/kraft_custom.properties"
+export KAFKA_SERVER_START="$KAFKA_BIN/kafka-server-start.sh"
+export KAFKA_SERVER_STOP="$KAFKA_BIN/kafka-server-stop.sh"
+export KAFKA_UUID="{{ lookup('ansible.builtin.file', playbook_dir + '/files/envtmp/kafka_cluster_uuid') }}"
+export KAFKA_STORAGE_FORMAT="$KAFKA_BIN/kafka-storage.sh format --standalone"
+export KAFKA_HEAP_OPTS="-Xmx256m -Xms256m"
+
+case "$1" in
+  start)
+    echo "Starting Kafka..."
+    $KAFKA_STORAGE_FORMAT --ignore-formatted -t $KAFKA_UUID -c $KAFKA_CONFIG
+    $KAFKA_SERVER_START -daemon $KAFKA_CONFIG
+    ;;
+  stop)
+    echo "Stopping Kafka..."
+    $KAFKA_SERVER_STOP
+    ;;
+  restart)
+    echo "Restarting Kafka..."
+    $0 stop
+    sleep 2
+    $0 start
+    ;;
+  status)
+    KAFKA_STATUS="$(ps x | grep -v 'Z' | grep [j]ava -c)"
+    if [ $KAFKA_STATUS = 0 ]; then
+       echo "Java is not running"
+       exit 1
+    else
+       echo -n "Java is running"
+       KAFKA_PORT_AV="$(netstat -l | grep -c 9092)"
+       if [ $KAFKA_PORT_AV = 0 ]; then
+         echo " but Kafka is not available."
+         exit 2
+       else
+         echo " and Kafka is available."
+       fi
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0

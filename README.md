@@ -6,7 +6,7 @@ Celý text zadání je k nalezení v adresáři `zadani`.
 ---
 
 Toto řešení implikuje, že ~~testovací server má spuštěné **sshd** na portu 22,~~ uživatel, pod kterým se test spouští má nastavený **keyless root** v `/etc/sudoers` ~~a ssh klíč v `authorized_keys`~~.
-Zároveň předpokládá, že je k dispozici python3 a python3-pip.
+Zároveň předpokládá, že je k dispozici python3 a python3-pip. Předpokládaná verza ansible-core je **2.17.9**.
 Pro jednoduchost opomíjí Execution Environment a spoléhá se na instalaci ostatních prerekvizit pomocí lokálního playbooku.
 
 Použité zdroje:
@@ -92,10 +92,34 @@ Dalším krokem bylo spuštění doposud neexistujících nginx exportérů, kte
 
 ---
 
-note to self:
-- variable expansion, redundance reduction, loop, with_item (deprecated?)
-- nginx limit 8080 to internal hostname
-- nginx proxy caching
-- kafka cluster
-- machine + human readable = json quite likely
- 
+## 20250306 - Poslední večer // Kafka & more
+
+Čtvrteční večer dva týdny po zadání úlohy jsem se rozhodl věnovat několika věcem, které mě na Ansible zaujaly, konkrétně rolím, smyčkám, podmínkám apod.
+
+Hlavní záměr byl celé řešení zjednodušit tak, abych zamezil redundanci kódu, tedy opakování zbytečného, případně zjistil, jakým způsobem lze věci dělat efektivněji a elegantněji.
+Zároveň jsem chtěl zprovoznit i Kafka cluster, který byl předposledním bodem zadání.
+
+Ačkoliv čistý čas strávený nad celou úlohou nebyl nikterak závratný a prostoru pro vypracování nebylo mnoho, připadala mi moje nově nabytá znalost Ansible pořád ještě dost okrajová.
+
+Plán byl tedy nejprve zprovoznit Kafka cluster a pak celé řešení přepsat do patřičně strukturované podoby využívající vše výše zmíněné.
+Provedení probíhalo spíše v opačném směru.
+
+Po přepsání většiny playbooků a snížení redundance jsem přistoupil ke zprovozňování Kafka clusteru.
+Konfiguraci Kafka clusteru jsem nedokončil stoprocentně, či vůbec úspěšně, přes veškerou snahu se mi nepodařilo instance v clusteru mezi sebou přimět komunikovat.
+Zajímavým bodem bylo zprovoznění služby pomocí SysVinit skriptu částečně inspirovaného již existujícími.
+
+---
+
+## 20250310
+
+Poslední večer před odevzdáním jsem se přeci jen rozhodl celé řešení trochu doleštit a upravit věci, které mě na řešení trápily a přišly mi neoptimální.
+Instalaci Docker daemonu na root uživatele a spouštění privileged kontejnerů jsem zaměnil za rootless Docker pod aktuálním uživatelem, nginx-proxy jsem přenastsavil na port 8011, zprovoznil jsem Prometheus exporter pro Apache Kafka, pár dalších drobných úprav, avšak Kafka cluster se mi stále nepodařilo přimět ke kominukaci.
+
+V tomto stavu úkol odevzdávám.
+
+## Závěr
+
+Bash skript v posledním bodu zadání jsem nestihl, ačkoliv jsem se celkem těšil na oprášení bash skriptování.
+Některé zvolené metody nebudou úplně optimální, ale snažil jsem se tu část řešení, již jsem schopen vypracovat, dokončit co nejdůkladněji.
+Ansible jako pro mě neznámá technologie mi přišla poměrně přátelská, dokumentace je napsaná velmi přehledně a celý princip je i přes svou jednoduchost dost působivý.
+Úkol odevzdávám s tím, že bych mu velmi rád věnoval ještě více času, ale bohužel odevzdávám dva týdny po zadání i přes poměrně malou celkovou časovou investici. Další prodlevy by ale byly nežádoucí pro další postup případných přijímacích řízení.
