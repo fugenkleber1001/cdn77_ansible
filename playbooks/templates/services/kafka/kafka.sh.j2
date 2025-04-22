@@ -16,7 +16,7 @@ export KAFKA_CONFIG="$KAFKA_HOME/config/kraft_custom.properties"
 export KAFKA_SERVER_START="$KAFKA_BIN/kafka-server-start.sh"
 export KAFKA_SERVER_STOP="$KAFKA_BIN/kafka-server-stop.sh"
 export KAFKA_UUID="{{ lookup('ansible.builtin.file', playbook_dir + '/files/envtmp/kafka_cluster_uuid') }}"
-export KAFKA_STORAGE_FORMAT="$KAFKA_BIN/kafka-storage.sh format --standalone"
+export KAFKA_STORAGE_FORMAT="$KAFKA_BIN/kafka-storage.sh format"
 export KAFKA_HEAP_OPTS="-Xmx256m -Xms256m"
 
 case "$1" in
